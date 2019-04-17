@@ -1,31 +1,30 @@
-const path = require('path');
-const express = require('express');
-const { createLightship } = require('lightship');
+/* eslint-env browser, es6 */
 
-// Lightship will start a HTTP service on port 9000.
-const lightship = createLightship();
+'use strict';
 
-const app = express();
+const app = require('./app.js');
 
-const FILENAME =
-  typeof __filename !== 'undefined'
-    ? __filename
-    : (/^ +at (?:file:\/*(?=\/)|)(.*?):\d+:\d+$/m.exec(Error().stack) || '')[1];
-const DIRNAME = typeof __dirname !== 'undefined' ? __dirname : FILENAME.replace(/[\/\\][^\/\\]*?$/, '');
+function main() {
+  const applicationServerPublicKey =
+    'BGb0TUcVgGYLNx85_peVgxdRz5EBORYF3RWWSnzYazSMYOiVrzZgJa_rDTujrc_tCKEdTUfEoezB1F3C2yvGr9E';
 
-app.get('/api', (req, res) => {
-  res.send('ok');
-});
+  let isSubscribed = false;
+  let swRegistration = null;
 
-app.use(express.static('app'));
+  function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(DIRNAME + '/index.html'));
-});
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
 
-app.listen(3000, () => {
-  console.log('Listening on port 3000');
-  lightship.signalReady();
-});
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
 
-// You can signal that the service is not ready using `lightship.signalNotReady()`.
+  app();
+}
+
+main();
