@@ -23,3 +23,40 @@ self.addEventListener('push', function(event) {
   const notificationPromise = self.registration.showNotification(title, options);
   event.waitUntil(notificationPromise);
 });
+
+self.addEventListener('notificationclick', function(event) {
+  console.log('[Service Worker] Notification click Received.');
+
+  event.notification.close();
+  const examplePage = '/';
+  // builds an absolute url up to and including examplePage from the apps origin ie http://localhost:3000/
+  const urlToOpen = new URL(examplePage, self.location.origin).href;
+
+  const promiseChain = clients
+    .matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    })
+    .then(windowClients => {
+      let matchingClient = null;
+
+      for (let i = 0; i < windowClients.length; i++) {
+        const windowClient = windowClients[i];
+        if (windowClient.url === urlToOpen) {
+          matchingClient = windowClient;
+          break;
+        }
+      }
+      console.log({ matchingClient });
+      console.log({ urlToOpen });
+      if (matchingClient) {
+        return matchingClient.focus();
+      } else {
+        return clients.openWindow(urlToOpen);
+      }
+    });
+
+  event.waitUntil(promiseChain);
+
+  // event.waitUntil(clients.openWindow('https://developers.google.com/web/'));
+});
