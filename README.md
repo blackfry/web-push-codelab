@@ -1,5 +1,11 @@
 # Push Notifications codelab
 
+## To start, run one of these
+
+> $ yarn start
+> $ npm run start
+> $ node app/index.js
+
 Code for the Web Fundamentals [Push Notifications codelab](https://codelabs.developers.google.com/codelabs/push-notifications/).
 
 In this codelab, you'll learn how to add Push Notifications to web applications. This will enable you to re-engage users with breaking news and information about
