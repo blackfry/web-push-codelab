@@ -20,13 +20,23 @@ function urlB64ToUint8Array(base64String) {
 }
 
 function updateBtn(isSubscribed) {
-  if (isSubscribed) {
-    pushButton.textContent = 'Disable Push Messaging';
+  if (!('Notification' in window)) {
+    alert('This browser does not support desktop notification');
   } else {
-    pushButton.textContent = 'Enable Push Messaging';
-  }
+    if (Notification.permission === 'denied') {
+      pushButton.textContent = 'Push Messaging Blocked.';
+      pushButton.disabled = true;
+      updateSubscriptionOnServer(null);
+      return;
+    }
+    if (isSubscribed) {
+      pushButton.textContent = 'Disable Push Messaging';
+    } else {
+      pushButton.textContent = 'Enable Push Messaging';
+    }
 
-  pushButton.disabled = false;
+    pushButton.disabled = false;
+  }
 }
 
 function updateSubscriptionOnServer(subscription) {
@@ -37,7 +47,6 @@ function updateSubscriptionOnServer(subscription) {
 
   if (subscription) {
     subscriptionJson.textContent = JSON.stringify(subscription);
-    console.log('asdf', subscriptionJson.textContent);
     subscriptionDetails.classList.remove('is-invisible');
   } else {
     subscriptionDetails.classList.add('is-invisible');
