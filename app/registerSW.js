@@ -7,7 +7,7 @@ const applicationServerPublicKey =
 let isSubscribed = false;
 let swRegistration = null;
 
-function urlB64ToUint8Array(base64String) {
+const urlB64ToUint8Array = base64String => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
@@ -18,9 +18,9 @@ function urlB64ToUint8Array(base64String) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
-}
+};
 
-function updateSubscriptionOnServer(subscription) {
+const updateSubscriptionOnServer = subscription => {
   // TODO: Send subscription to application server
 
   const subscriptionJson = document.querySelector('.js-subscription-json');
@@ -32,9 +32,9 @@ function updateSubscriptionOnServer(subscription) {
   } else {
     subscriptionDetails.classList.add('is-invisible');
   }
-}
+};
 
-function updateBtn(isSubscribed) {
+const updateBtn = isSubscribed => {
   if (!('Notification' in window)) {
     // eslint-disable-next-line no-alert
     alert('This browser does not support desktop notification');
@@ -53,76 +53,68 @@ function updateBtn(isSubscribed) {
 
     pushButton.disabled = false;
   }
-}
-
-const subscribeUser = () => {
-  const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
-  swRegistration.pushManager
-    .subscribe({
-      userVisibleOnly: true,
-      applicationServerKey,
-    })
-    .then(subscription => {
-      console.log('User is subscribed.');
-
-      updateSubscriptionOnServer(subscription);
-
-      isSubscribed = true;
-
-      updateBtn(isSubscribed);
-    })
-    .catch(err => {
-      console.log('Failed to subscribe the user: ', err);
-      updateBtn(false);
-    });
 };
 
-const unsubscribeUser = () => {
-  swRegistration.pushManager
-    .getSubscription()
-    .then(subscription => {
-      if (!subscription) {
-        return null;
-      }
-      return subscription.unsubscribe();
-    })
-    .catch(err => {
-      console.log('Error unsubscribing', err);
-    })
-    .then(() => {
+const subscribeUser = async () => {
+  const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+  try {
+    const subscription = await swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey,
+    });
+
+    console.log('User is subscribed.');
+
+    updateSubscriptionOnServer(subscription);
+
+    isSubscribed = true;
+
+    updateBtn(isSubscribed);
+  } catch (err) {
+    console.log('Failed to subscribe the user: ', err);
+    updateBtn(false);
+  }
+};
+
+const unsubscribeUser = async () => {
+  try {
+    const subscription = await swRegistration.pushManager.getSubscription();
+    if (subscription) {
+      subscription.unsubscribe();
       updateSubscriptionOnServer(null);
 
       console.log('User is unsubscribed.');
       isSubscribed = false;
 
-      updateBtn();
-    });
+      updateBtn(false);
+    }
+  } catch (err) {
+    console.log('Error unsubscribing', err);
+  }
 };
 
-const initializeUI = swRegistration => {
-  pushButton.addEventListener('click', () => {
+const initializeUI = async swRegistration => {
+  pushButton.addEventListener('click', async () => {
     pushButton.disabled = true;
     if (isSubscribed) {
-      unsubscribeUser();
+      await unsubscribeUser();
     } else {
       subscribeUser();
     }
   });
 
   // Set the initial subscription value
-  swRegistration.pushManager.getSubscription().then(subscription => {
-    isSubscribed = !(subscription === null);
+  const subscription = await swRegistration.pushManager.getSubscription();
+  isSubscribed = !(subscription === null);
+  await updateSubscriptionOnServer(subscription);
 
-    updateSubscriptionOnServer(subscription);
+  if (isSubscribed) {
+    console.log('User IS subscribed.');
+  } else {
+    console.log('User is NOT subscribed.');
+  }
 
-    if (isSubscribed) {
-      console.log('User IS subscribed.');
-    } else {
-      console.log('User is NOT subscribed.');
-    }
-
-    updateBtn(isSubscribed);
-  });
+  updateBtn(isSubscribed);
 };
 
 if ('serviceWorker' in navigator && 'PushManager' in window) {

@@ -16,18 +16,16 @@ const sendPushMessageResolver = async (req, res) => {
     TTL: 60 * 60,
   };
 
-  webpush
-    .sendNotification(req.body.subscription, req.body.data, options)
-    .then(() => {
-      res.status(200).send({ success: true });
-    })
-    .catch(err => {
-      if (err.statusCode) {
-        res.status(err.statusCode).send(err.body);
-      } else {
-        res.status(400).send(err.message);
-      }
-    });
+  try {
+    await webpush.sendNotification(req.body.subscription, req.body.data, options);
+    res.status(200).send({ success: true });
+  } catch (err) {
+    if (err.statusCode) {
+      res.status(err.statusCode).send(err.body);
+    } else {
+      res.status(400).send(err.message);
+    }
+  }
 };
 
 const routes = {
