@@ -1,6 +1,8 @@
 const path = require('path');
 const express = require('express');
+const bodyParser = require('body-parser');
 const { createLightship } = require('lightship');
+const apiRouter = require('./api');
 
 const app = () => {
   require('dotenv');
@@ -13,16 +15,15 @@ const app = () => {
     typeof __filename !== 'undefined'
       ? __filename
       : (/^ +at (?:file:\/*(?=\/)|)(.*?):\d+:\d+$/m.exec(Error().stack) || '')[1];
-  const DIRNAME = typeof __dirname !== 'undefined' ? __dirname : FILENAME.replace(/[\/\\][^\/\\]*?$/, '');
+  const DIRNAME = typeof __dirname !== 'undefined' ? __dirname : FILENAME.replace(/[/\\][^/\\]*?$/, '');
 
-  app.get('/api', (req, res) => {
-    res.send('ok');
-  });
+  app.use(bodyParser.json());
+  app.use('/api', apiRouter());
 
   app.use(express.static('app'));
 
   app.get('*', (req, res) => {
-    res.sendFile(path.join(DIRNAME + '/index.html'));
+    res.sendFile(path.join(`${DIRNAME}/index.html`));
   });
 
   app.listen(3000, () => {

@@ -1,9 +1,7 @@
 /* eslint-env browser, serviceworker, es6 */
 
-'use strict';
-
 // self references the service worker
-self.addEventListener('push', function(event) {
+self.addEventListener('push', event => {
   console.log('[Service Worker] Push Received.');
   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
 
@@ -11,7 +9,7 @@ self.addEventListener('push', function(event) {
   const options = {
     body: 'Yay it works.',
     icon: 'images/icon.png',
-    badge: 'images/badge.png'
+    badge: 'images/badge.png',
   };
 
   /**
@@ -24,7 +22,7 @@ self.addEventListener('push', function(event) {
   event.waitUntil(notificationPromise);
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', event => {
   console.log('[Service Worker] Notification click Received.');
 
   event.notification.close();
@@ -35,12 +33,12 @@ self.addEventListener('notificationclick', function(event) {
   const promiseChain = clients
     .matchAll({
       type: 'window',
-      includeUncontrolled: true
+      includeUncontrolled: true,
     })
     .then(windowClients => {
       let matchingClient = null;
 
-      for (let i = 0; i < windowClients.length; i++) {
+      for (let i = 0; i < windowClients.length; i += 1) {
         const windowClient = windowClients[i];
         if (windowClient.url === urlToOpen) {
           matchingClient = windowClient;
@@ -51,12 +49,9 @@ self.addEventListener('notificationclick', function(event) {
       console.log({ urlToOpen });
       if (matchingClient) {
         return matchingClient.focus();
-      } else {
-        return clients.openWindow(urlToOpen);
       }
+      return clients.openWindow(urlToOpen);
     });
 
   event.waitUntil(promiseChain);
-
-  // event.waitUntil(clients.openWindow('https://developers.google.com/web/'));
 });
