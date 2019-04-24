@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "eslint \".\"",
     "test": "npm run lint",
-    "start": "nodemon --inspect app/index.js"
+    "start": "nodemon --inspect index.js"
   },
   "devDependencies": {
     "babel-eslint": "10.0.1",
@@ -32,6 +32,7 @@
     "body-parser": "^1.18.3",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "firebase": "5.9.3",
     "lightship": "^3.0.1",
     "web-push": "^3.3.3"
   }

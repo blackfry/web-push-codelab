@@ -2,7 +2,7 @@
 const pushButton = document.querySelector('.js-push-btn');
 
 const applicationServerPublicKey =
-  'BLzwkk-0FfeTyPZApiob1QlVt70qfcBav9tfwLuPXRsmExxd9SXnNRWP1bmrZmvNVhWflWB8HNJATXvj57YpnUs';
+  'BJvPwI4fF1mxRDKDsFYlqvVEp4HXNK8uqL9THAULddPNL-811K_hfB7Sg5PrjTgwUpxV4QTvGTgpzFFib-To0Y8';
 
 let isSubscribed = false;
 let swRegistration = null;
@@ -22,7 +22,6 @@ const urlB64ToUint8Array = base64String => {
 
 const updateSubscriptionOnServer = subscription => {
   // TODO: Send subscription to application server
-
   const subscriptionJson = document.querySelector('.js-subscription-json');
   const subscriptionDetails = document.querySelector('.js-subscription-details');
 
@@ -63,8 +62,6 @@ const subscribeUser = async () => {
       applicationServerKey,
     });
 
-    console.log('User is subscribed.');
-
     updateSubscriptionOnServer(subscription);
 
     isSubscribed = true;
@@ -82,8 +79,6 @@ const unsubscribeUser = async () => {
     if (subscription) {
       subscription.unsubscribe();
       updateSubscriptionOnServer(null);
-
-      console.log('User is unsubscribed.');
       isSubscribed = false;
 
       updateBtn(false);
@@ -106,10 +101,19 @@ const initializeUI = async swRegistration => {
   // Set the initial subscription value
   const subscription = await swRegistration.pushManager.getSubscription();
   isSubscribed = !(subscription === null);
-  await updateSubscriptionOnServer(subscription);
+
+  await updateSubscriptionOnServer({ subscription });
 
   if (isSubscribed) {
     console.log('User IS subscribed.');
+    // test fire a notification on subscribed and page load
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ subscription }),
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
   } else {
     console.log('User is NOT subscribed.');
   }

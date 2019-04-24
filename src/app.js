@@ -5,7 +5,6 @@ const { createLightship } = require('lightship');
 const apiRouter = require('./api');
 
 const app = () => {
-  require('dotenv');
   // Lightship will start a HTTP service on port 9000.
   const lightship = createLightship();
 
@@ -20,7 +19,7 @@ const app = () => {
   app.use(bodyParser.json());
   app.use('/api', apiRouter());
 
-  app.use(express.static('app'));
+  app.use(express.static('src'));
 
   app.get('*', (req, res) => {
     res.sendFile(path.join(`${DIRNAME}/index.html`));

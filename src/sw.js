@@ -23,7 +23,7 @@ self.addEventListener('push', event => {
 });
 
 self.addEventListener('notificationclick', event => {
-  console.log('[Service Worker] Notification click Received.');
+  console.log('[Service Worker] Notification click Received.', { event });
 
   event.notification.close();
   const examplePage = '/';
@@ -45,8 +45,7 @@ self.addEventListener('notificationclick', event => {
           break;
         }
       }
-      console.log({ matchingClient });
-      console.log({ urlToOpen });
+
       if (matchingClient) {
         return matchingClient.focus();
       }
